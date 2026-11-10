@@ -19,8 +19,8 @@ enum BootROM {
         case download(String), damaged
         var errorDescription: String? {
             switch self {
-            case .download(let why): return "Henge couldn't get the Mac's boot ROM from Apple (\(why)). Check the connection and try again."
-            case .damaged: return "The Mac's boot ROM from Apple wasn't what Henge expected, so it wasn't used. Check the connection and try again, or look for an update to Henge."
+            case .download(let why): return "Henge 无法从 Apple 获取 Mac 的启动 ROM（\(why)）。请检查网络连接后重试。"
+            case .damaged: return "从 Apple 取回的 Mac 启动 ROM 与预期不符，因此没有使用。请检查网络连接后重试，或看看 Henge 是否有更新。"
             }
         }
     }
@@ -39,13 +39,13 @@ enum BootROM {
     static func download() async throws -> Data {
         var request = URLRequest(url: source)
         request.setValue("bytes=\(blockOffset)-\(blockOffset + blockLength - 1)", forHTTPHeaderField: "Range")
-        var lastFailure = "no answer"
+        var lastFailure = "无响应"
         for attempt in 1...3 {
             do {
                 let (data, response) = try await URLSession.shared.data(for: request)
                 let status = (response as? HTTPURLResponse)?.statusCode ?? 0
                 guard status == 206, data.count == blockLength else {
-                    lastFailure = "HTTP \(status), \(data.count) bytes"
+                    lastFailure = "HTTP \(status)，\(data.count) 字节"
                     continue
                 }
                 guard let rom = unpack(data), isGenuine(rom) else { throw Failure.damaged }

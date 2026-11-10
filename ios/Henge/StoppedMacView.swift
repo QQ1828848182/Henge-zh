@@ -31,8 +31,8 @@ struct StoppedMacView: View {
             Text(title).font(.headline)
             Text(detail).font(.subheadline).foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
-            if let start { Button("Start Mac", action: start).buttonStyle(.borderedProminent) }
-            Button("Close", action: close).buttonStyle(.bordered)
+            if let start { Button("启动 Mac", action: start).buttonStyle(.borderedProminent) }
+            Button("关闭", action: close).buttonStyle(.bordered)
         }
         .foregroundStyle(.white)
         .padding(24)

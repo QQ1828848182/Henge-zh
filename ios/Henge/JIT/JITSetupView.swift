@@ -64,45 +64,44 @@ struct JITSetupFlow: View {
     // MARK: Choose
 
     private var choose: some View {
-        page(symbol: "bolt.fill", title: "Turn on JIT",
-             subtitle: "A Mac needs memory it can write and then run, which on iOS only an attached "
-                     + "debugger can grant. Choose how your \(device) gets one.") {
+        page(symbol: "bolt.fill", title: "开启 JIT",
+             subtitle: "Mac 需要一段能写入、随后能执行的内存，在 iOS 上只有已附加的调试器才给得了。请选择让这台 \\(device) 怎么获得。") {
             VStack(spacing: 10) {
                 let builtIn = HengeBuiltInJIT.unavailableReason
-                way("Pair on this \(device)", symbol: "iphone.radiowaves.left.and.right",
-                    detail: builtIn ?? (!OnDevicePairing.isSupported ? "Needs iOS 27 or later."
-                        : jit.pairingSource == .onDevice ? "Paired on this \(device)."
-                        : "No computer needed. Pairs from Settings in a minute."),
+                way("在这台 \(device) 上配对", symbol: "iphone.radiowaves.left.and.right",
+                    detail: builtIn ?? (!OnDevicePairing.isSupported ? "需要 iOS 27 或更新版本。"
+                        : jit.pairingSource == .onDevice ? "已在这台 \(device) 上配对。"
+                        : "不需要电脑。在「设置」里一分钟就能配对。"),
                     done: jit.pairingSource == .onDevice,
                     enabled: builtIn == nil && OnDevicePairing.isSupported) { path.append(.pairOnDevice) }
-                way("Use a pairing file", symbol: "doc.badge.plus",
-                    detail: builtIn ?? (jit.pairingSource == .imported ? "Pairing file imported."
-                        : "Import a pairing file made on a computer."),
+                way("使用配对文件", symbol: "doc.badge.plus",
+                    detail: builtIn ?? (jit.pairingSource == .imported ? "已导入配对文件。"
+                        : "导入在电脑上生成的配对文件。"),
                     done: jit.pairingSource == .imported,
                     enabled: builtIn == nil) { path.append(.importFile) }
-                way("Use StikDebug", symbol: "ant",
-                    detail: JITBootstrap.isStikDebugInstalled ? "StikDebug is installed."
-                        : "Enable JIT through the StikDebug app.",
+                way("使用 StikDebug", symbol: "ant",
+                    detail: JITBootstrap.isStikDebugInstalled ? "已安装 StikDebug。"
+                        : "通过 StikDebug App 开启 JIT。",
                     done: jit.method == .stikDebug) { path.append(.stikDebug) }
-                way("Use TrollStore", symbol: "sparkles",
-                    detail: JITBootstrap.isTrollStoreInstalled ? "TrollStore is installed."
-                        : "For a Henge installed through TrollStore.",
+                way("使用 TrollStore", symbol: "sparkles",
+                    detail: JITBootstrap.isTrollStoreInstalled ? "已安装 TrollStore。"
+                        : "适用于通过 TrollStore 安装的 Henge。",
                     done: jit.method == .trollStore) { path.append(.trollStore) }
-                way("Use a jailbreak", symbol: "lock.open",
-                    detail: JITBootstrap.debuggedAtLaunch ? "JIT was already on when Henge opened."
-                        : JITBootstrap.isJailbroken ? "A jailbreak was found. Turn on Allow JIT in Apps."
-                        : "Dopamine can give every app JIT with one setting.",
+                way("使用越狱", symbol: "lock.open",
+                    detail: JITBootstrap.debuggedAtLaunch ? "打开 Henge 时 JIT 已经开启。"
+                        : JITBootstrap.isJailbroken ? "检测到越狱。请打开「允许 App 使用 JIT」。"
+                        : "Dopamine 只需一个设置就能给所有 App 开启 JIT。",
                     done: jit.method == .jailbreak || JITBootstrap.debuggedAtLaunch) { path.append(.jailbreak) }
             }
             if jit.hasPairing && HengeBuiltInJIT.isAvailable {
                 Button { path.append(.connect) } label: {
-                    Label("Continue with the current pairing", systemImage: "arrow.right")
+                    Label("沿用当前的配对继续", systemImage: "arrow.right")
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .padding(.top, 4)
             }
         } actions: {
-            Button("Not now") { close() }
+            Button("以后再说") { close() }
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Theme.textDim)
         }
@@ -145,19 +144,16 @@ struct JITSetupFlow: View {
     }
 
     private var pairOnDevice: some View {
-        page(symbol: "iphone.radiowaves.left.and.right", title: "Pair on this \(device)",
-             subtitle: "Henge pretends to be a computer on your Wi-Fi, and your \(device) pairs with it "
-                     + "the way it would with a Mac.") {
+        page(symbol: "iphone.radiowaves.left.and.right", title: "在这台 \(device) 上配对",
+             subtitle: "Henge 会在你的 Wi-Fi 上假装成一台电脑，你的 \\(device) 会像与 Mac 配对那样和它配对。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Turn on Wi-Fi, tap **Start pairing** below and allow Local Network access.",
+                point(1, "打开 Wi-Fi，点下面的 **开始配对**，并允许访问本地网络。",
                       done: pairing.phase != .idle)
-                point(2, "Open **Settings › Privacy & Security › Developer Mode**, scroll down and tap "
-                       + "**Pair with \(OnDevicePairing.hostName)**.",
+                point(2, "打开 **设置 › 隐私与安全性 › 开发者模式**，往下滑，点 **与 \\(OnDevicePairing.hostName) 配对**。",
                       done: pairing.isShowingPin || pairedOnDevice)
-                point(3, "Enter the code Henge shows. It also appears in a banner and a notification, "
-                       + "so you don't have to switch back.",
+                point(3, "输入 Henge 显示的配对码。它也会出现在横幅和通知里，不用来回切换。",
                       done: pairedOnDevice)
-                point(4, "Come back to Henge.", done: pairedOnDevice)
+                point(4, "回到 Henge。", done: pairedOnDevice)
             }
             .padding(16).hengeCard()
             pairingStatus
@@ -165,15 +161,15 @@ struct JITSetupFlow: View {
             switch pairing.phase {
             case .idle, .failed:
                 Button { pairing.start() } label: {
-                    Label("Start pairing", systemImage: "dot.radiowaves.left.and.right")
+                    Label("开始配对", systemImage: "dot.radiowaves.left.and.right")
                 }
                 .buttonStyle(PrimaryButtonStyle())
             case .waiting, .pin:
-                Button("Cancel pairing", role: .cancel) { pairing.cancel() }
+                Button("取消配对", role: .cancel) { pairing.cancel() }
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Theme.textDim)
             case .paired:
-                Button("Continue") { path.append(.connect) }
+                Button("继续") { path.append(.connect) }
                     .buttonStyle(PrimaryButtonStyle())
             }
         }
@@ -187,16 +183,15 @@ struct JITSetupFlow: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
                     ProgressView().tint(Theme.accent)
-                    Text("Waiting for your \(device)…").font(.system(size: 15, weight: .semibold))
+                    Text("正在等待你的 \(device)…").font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Theme.text)
                 }
-                Button("Open Settings") {
+                Button("打开设置") {
                     if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
                 }
                 .font(.system(size: 14, weight: .semibold))
                 if pairing.backgroundLimited {
-                    Text("This installation can only wait about 30 seconds in the background, "
-                       + "so go to Settings straight away.")
+                    Text("这次安装只能在后台等大约 30 秒，请立刻去「设置」。")
                         .font(.system(size: 13)).foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -205,17 +200,17 @@ struct JITSetupFlow: View {
             .padding(16).hengeCard()
         case .pin(let pin):
             VStack(spacing: 8) {
-                Text("Enter this code on your \(device)").font(.system(size: 14))
+                Text("在你的 \(device) 上输入这个配对码").font(.system(size: 14))
                     .foregroundStyle(Theme.textDim)
                 Text(pin).font(.system(size: 40, weight: .bold, design: .monospaced)).tracking(6)
                     .foregroundStyle(Theme.text)
                     .textSelection(.enabled)
-                    .accessibilityLabel("Pairing code \(pin.map(String.init).joined(separator: " "))")
+                    .accessibilityLabel("配对码 \(pin.map(String.init).joined(separator: " "))")
             }
             .frame(maxWidth: .infinity)
             .padding(18).hengeCard(high: true)
         case .paired(let name):
-            outcome("Paired with \(name)", ok: true)
+            outcome("已与 \(name) 配对", ok: true)
         case .failed(let message):
             outcome(message, ok: false)
         }
@@ -224,28 +219,27 @@ struct JITSetupFlow: View {
     // MARK: Import a pairing file
 
     private var importFile: some View {
-        page(symbol: "doc.badge.plus", title: "Use a pairing file",
-             subtitle: "A pairing file made on a computer lets Henge talk to this \(device) the same way.") {
+        page(symbol: "doc.badge.plus", title: "使用配对文件",
+             subtitle: "在电脑上生成的配对文件，可以让 Henge 以同样的方式与这台 \(device) 通信。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "On a computer, make this \(device)'s pairing file with the "
-                       + "[StikDebug pairing-file guide](https://github.com/StikDebug/StikDebug-Guide/blob/main/pairing_file.md).",
+                point(1, "在电脑上按 [StikDebug 配对文件指南](https://github.com/StikDebug/StikDebug-Guide/blob/main/pairing_file.md) 生成这台 \\(device) 的配对文件。",
                       done: jit.pairingSource == .imported)
-                point(2, "Save it to Files, or AirDrop it to this \(device).",
+                point(2, "把它存到「文件」，或用隔空投送传到这台 \(device)。",
                       done: jit.pairingSource == .imported)
-                point(3, "Tap **Choose pairing file** and pick it.", done: jit.pairingSource == .imported)
+                point(3, "点 **选择配对文件**，把它选出来。", done: jit.pairingSource == .imported)
             }
             .padding(16).hengeCard()
-            Label("The pairing file stays in Henge's Documents folder and is only sent to Henge's own helper.",
+            Label("配对文件留在 Henge 的 Documents 文件夹里，只会发给 Henge 自己的助手。",
                   systemImage: "lock.fill")
                 .font(.system(size: 13)).foregroundStyle(Theme.textDim)
             if let error = jit.error { outcome(error, ok: false) }
         } actions: {
             if jit.pairingSource == .imported {
-                Button("Continue") { path.append(.connect) }.buttonStyle(PrimaryButtonStyle())
-                Button("Choose another file") { importing = true }
+                Button("继续") { path.append(.connect) }.buttonStyle(PrimaryButtonStyle())
+                Button("选择其他文件") { importing = true }
                     .font(.system(size: 15, weight: .medium))
             } else {
-                Button { importing = true } label: { Label("Choose pairing file", systemImage: "folder") }
+                Button { importing = true } label: { Label("选择配对文件", systemImage: "folder") }
                     .buttonStyle(PrimaryButtonStyle())
             }
         }
@@ -254,20 +248,19 @@ struct JITSetupFlow: View {
     // MARK: LocalDevVPN
 
     private var connect: some View {
-        page(symbol: "network.badge.shield.half.filled", title: "Connect LocalDevVPN",
-             subtitle: "Henge's helper reaches this \(device)'s debugging service through a local VPN. "
-                     + "Nothing leaves your \(device).") {
+        page(symbol: "network.badge.shield.half.filled", title: "连接 LocalDevVPN",
+             subtitle: "Henge 的助手通过本地 VPN 访问这台 \\(device) 的调试服务，数据不会离开你的 \\(device)。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Install [LocalDevVPN](\(LocalDevVPN.appStore.absoluteString)) from the App Store.",
+                point(1, "从 App Store 安装 [LocalDevVPN](\(LocalDevVPN.appStore.absoluteString))。",
                       done: LocalDevVPN.isInstalled)
-                point(2, "Tap **Connect LocalDevVPN**. It switches the VPN on and comes straight back to Henge.")
-                point(3, "Leave it connected whenever you turn JIT on.")
+                point(2, "点 **连接 LocalDevVPN**。它会打开 VPN，然后直接回到 Henge。")
+                point(3, "开启 JIT 时让它保持连接。")
             }
             .padding(16).hengeCard()
         } actions: {
             Button(LocalDevVPN.actionTitle) { LocalDevVPN.open() }
                 .buttonStyle(PrimaryButtonStyle())
-            Button("It's connected") { path.append(.enable) }
+            Button("已连接") { path.append(.enable) }
                 .font(.system(size: 15, weight: .medium))
         }
     }
@@ -277,30 +270,29 @@ struct JITSetupFlow: View {
     private var attached: Bool { jit.attachGeneration > 0 || JITBootstrap.debuggedFlag }
 
     private var enable: some View {
-        page(symbol: "bolt.badge.checkmark", title: "Turn on JIT",
-             subtitle: "The first check downloads and mounts Apple's Developer Disk Image, "
-                     + "which can take a minute.") {
+        page(symbol: "bolt.badge.checkmark", title: "开启 JIT",
+             subtitle: "第一次检查会下载并挂载 Apple 的开发者磁盘映像，可能要一分钟。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Tap **Check setup**. Henge checks LocalDevVPN and prepares the Developer Disk Image.",
+                point(1, "点 **检查设置**。Henge 会检查 LocalDevVPN，并准备好开发者磁盘映像。",
                       done: jit.prepared || attached)
-                point(2, "Tap **Enable JIT**. Henge's helper attaches and a Mac can start.", done: attached)
+                point(2, "点 **开启 JIT**。Henge 的助手附加成功后就能启动 Mac 了。", done: attached)
             }
             .padding(16).hengeCard()
 
             if jit.busy {
                 HStack(spacing: 11) {
                     ProgressView().tint(Theme.accent)
-                    Text(jit.status ?? "Working…").font(.system(size: 14)).foregroundStyle(Theme.text)
+                    Text(jit.status ?? "处理中…").font(.system(size: 14)).foregroundStyle(Theme.text)
                     Spacer(minLength: 0)
                 }
                 .padding(16).hengeCard(high: true)
             } else if attached {
-                outcome("JIT is on. a Mac can start.", ok: true)
+                outcome("JIT 已开启，可以启动 Mac 了。", ok: true)
             } else if let error = jit.error {
                 VStack(alignment: .leading, spacing: 10) {
                     outcome(error, ok: false)
                     if jit.advice?.actions.contains(.pairAgain) == true {
-                        Button(OnDevicePairing.isSupported ? "Pair again" : "Import a new pairing file") {
+                        Button(OnDevicePairing.isSupported ? "重新配对" : "导入新的配对文件") {
                             path = [OnDevicePairing.isSupported ? .pairOnDevice : .importFile]
                         }
                         .font(.system(size: 14, weight: .semibold))
@@ -315,20 +307,20 @@ struct JITSetupFlow: View {
             }
 
             if !attached {
-                Button("Reset Developer Disk Image", role: .destructive) { jit.resetDDI() }
+                Button("重置开发者磁盘映像", role: .destructive) { jit.resetDDI() }
                     .font(.system(size: 13, weight: .medium))
                     .disabled(jit.busy)
                     .padding(.top, 4)
             }
         } actions: {
             if attached {
-                Button("Done") { close() }.buttonStyle(PrimaryButtonStyle())
+                Button("完成") { close() }.buttonStyle(PrimaryButtonStyle())
             } else if jit.prepared {
-                Button { jit.enableBuiltIn() } label: { Label("Enable JIT", systemImage: "bolt.fill") }
+                Button { jit.enableBuiltIn() } label: { Label("开启 JIT", systemImage: "bolt.fill") }
                     .buttonStyle(PrimaryButtonStyle(enabled: !jit.busy))
                     .disabled(jit.busy)
             } else {
-                Button("Check setup") { jit.prepareBuiltIn() }
+                Button("检查设置") { jit.prepareBuiltIn() }
                     .buttonStyle(PrimaryButtonStyle(enabled: !jit.busy))
                     .disabled(jit.busy)
             }
@@ -338,19 +330,18 @@ struct JITSetupFlow: View {
     // MARK: StikDebug
 
     private var stikDebug: some View {
-        page(symbol: "ant", title: "Use StikDebug",
-             subtitle: "StikDebug is a separate app that attaches to Henge. Henge sends it the JIT script "
-                     + "itself, so nothing needs configuring for Henge inside StikDebug.") {
+        page(symbol: "ant", title: "使用 StikDebug",
+             subtitle: "StikDebug 是一个独立的 App，会附加到 Henge。Henge 会把 JIT 脚本直接发给它，所以不用在 StikDebug 里为 Henge 做任何配置。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Install [StikDebug](https://github.com/StikDebug/StikDebug/releases/latest).",
+                point(1, "安装 [StikDebug](https://github.com/StikDebug/StikDebug/releases/latest)。",
                       done: JITBootstrap.isStikDebugInstalled)
-                point(2, "Import this \(device)'s pairing file into StikDebug.")
-                point(3, "Install and connect [LocalDevVPN](\(LocalDevVPN.appStore.absoluteString)).")
-                point(4, "Whenever you start a Mac, Henge opens StikDebug, which attaches and comes back.")
+                point(2, "把这台 \(device) 的配对文件导入 StikDebug。")
+                point(3, "安装并连接 [LocalDevVPN](\(LocalDevVPN.appStore.absoluteString))。")
+                point(4, "每次启动 Mac 时，Henge 都会打开 StikDebug，它附加后会自己回来。")
             }
             .padding(16).hengeCard()
         } actions: {
-            Button("Use StikDebug") {
+            Button("使用 StikDebug") {
                 jit.method = .stikDebug
                 HengeLog.log("ui", "JIT method set to StikDebug")
                 close()
@@ -362,25 +353,22 @@ struct JITSetupFlow: View {
     // MARK: TrollStore
 
     private var trollStore: some View {
-        page(symbol: "sparkles", title: "Use TrollStore",
-             subtitle: "TrollStore can enable JIT for apps it installed, with no pairing file, "
-                     + "VPN or computer.") {
+        page(symbol: "sparkles", title: "使用 TrollStore",
+             subtitle: "TrollStore 能给通过它安装的 App 开启 JIT，不需要配对文件、VPN 或电脑。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Install Henge.ipa through TrollStore, on an iOS version TrollStore supports. It carries the "
-                       + "entitlements TrollStore keeps, so the same file works there and in a sideloader.",
+                point(1, "在 TrollStore 支持的 iOS 版本上，通过 TrollStore 安装 Henge.ipa。它带着 TrollStore 会保留的权限，所以同一个文件在 TrollStore 和签名工具里都能用。",
                       done: JITBootstrap.isInstalledWithTrollStore)
-                point(2, "In TrollStore's Settings, turn on URL Scheme. TrollStore ignores enable-jit requests without it.")
-                point(3, "Whenever a Mac starts, Henge asks TrollStore to enable JIT. TrollStore opens Henge, "
-                       + "attaches to it for a moment and lets go, which leaves it allowed to run code it wrote.")
+                point(2, "在 TrollStore 的设置里打开「URL Scheme」。不打开的话，TrollStore 会忽略开启 JIT 的请求。")
+                point(3, "每次启动 Mac 时，Henge 会请 TrollStore 开启 JIT。TrollStore 打开 Henge，附加一瞬间再放开，这样 Henge 就被允许运行自己写入的代码。")
             }
             .padding(16).hengeCard()
             if !JITBootstrap.isTrollStoreInstalled {
-                Label("TrollStore was not found on this \(device). It installs on iOS 14.0 to 17.0.", systemImage: "info.circle")
+                Label("这台 \(device) 上没有找到 TrollStore。它只能装在 iOS 14.0 到 17.0 上。", systemImage: "info.circle")
                     .font(.system(size: 13)).foregroundStyle(Theme.textDim)
                     .fixedSize(horizontal: false, vertical: true)
             }
         } actions: {
-            Button("Use TrollStore") {
+            Button("使用 TrollStore") {
                 jit.method = .trollStore
                 HengeLog.log("ui", "JIT method set to TrollStore")
                 close()
@@ -392,25 +380,24 @@ struct JITSetupFlow: View {
     // MARK: Jailbreak
 
     private var jailbreak: some View {
-        page(symbol: "lock.open", title: "Use a jailbreak",
-             subtitle: "On a device jailbroken with Dopamine, JIT is a setting: the jailbreak marks every app as "
-                     + "debugged when it opens, and a debugged app may run code it wrote. Henge needs nothing else.") {
+        page(symbol: "lock.open", title: "使用越狱",
+             subtitle: "在用 Dopamine 越狱的设备上，JIT 只是一个设置：越狱会让每个 App 打开时都被标记为已调试，而已调试的 App 可以运行自己写入的代码。Henge 不需要别的。") {
             VStack(alignment: .leading, spacing: 14) {
-                point(1, "Open Dopamine and go to its Settings.", done: JITBootstrap.isJailbroken)
-                point(2, "Turn on Allow JIT in Apps.")
-                point(3, "Close Henge completely and open it again. The setting applies to apps as they start.",
+                point(1, "打开 Dopamine，进入它的设置。", done: JITBootstrap.isJailbroken)
+                point(2, "打开「允许 App 使用 JIT」。")
+                point(3, "完全关掉 Henge 再重新打开。这个设置只在 App 启动时生效。",
                       done: JITBootstrap.debuggedAtLaunch)
             }
             .padding(16).hengeCard()
             if JITBootstrap.debuggedAtLaunch {
-                Label("Henge was marked as debugged when it opened, so JIT is on.", systemImage: "checkmark.circle.fill")
+                Label("Henge 打开时已被标记为已调试，所以 JIT 已开启。", systemImage: "checkmark.circle.fill")
                     .font(.system(size: 13)).foregroundStyle(.green)
             } else if !JITBootstrap.isJailbroken {
-                Label("No jailbreak was found on this \(device).", systemImage: "info.circle")
+                Label("这台 \(device) 上没有检测到越狱。", systemImage: "info.circle")
                     .font(.system(size: 13)).foregroundStyle(Theme.textDim)
             }
         } actions: {
-            Button("Use the jailbreak") {
+            Button("使用越狱") {
                 jit.method = .jailbreak
                 HengeLog.log("ui", "JIT method set to jailbreak")
                 close()
@@ -450,7 +437,7 @@ struct JITSetupFlow: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Close") { close() }
+                Button("关闭") { close() }
             }
         }
     }

@@ -46,8 +46,8 @@ enum Device {
 
     /// What a choice risks on this device, if anything. An install always gets at least 2 GB (Installer.install).
     static func memoryNote(_ gb: Int) -> String? {
-        if gb < 4 { return "macOS has little room under 4 GB, so it can be very slow." }
-        if gb > suggestedRAMGB { return "More than \(suggestedRAMGB) GB is a lot for this \(name): iOS may close Henge when macOS gets busy." }
+        if gb < 4 { return "4 GB 以下 macOS 空间很紧，可能会非常慢。" }
+        if gb > suggestedRAMGB { return "超过 \(suggestedRAMGB) GB 对这台 \(name) 来说太多了：macOS 忙起来时 iOS 可能会关掉 Henge。" }
         return nil
     }
 
@@ -60,7 +60,7 @@ enum Device {
         return major < 13
     }()
 
-    static let chipTooOldText = "macOS won't run on this \(name). Henge needs an A14 or M1 chip or newer."
+    static let chipTooOldText = "这台 \(name) 无法运行 macOS。Henge 需要 A14 或 M1 及更新的芯片。"
 }
 
 /// A keyboard attached to the device. iOS reports each key going down and coming up by its HID usage,

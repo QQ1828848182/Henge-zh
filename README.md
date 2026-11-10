@@ -14,6 +14,8 @@
   <a href="https://itslevii.dev">Website</a>
   ·
   <a href="https://github.com/Leviidev/Henge/releases">Releases</a>
+  ·
+  <a href="README.zh-CN.md">简体中文</a>
 </p>
 
 <p align="center">

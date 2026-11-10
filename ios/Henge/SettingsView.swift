@@ -19,15 +19,15 @@ struct SettingsView: View {
     /// The second footer paragraph: how you click, given the selected input mode.
     private var inputDescription: String {
         if inputMode == .touchscreen {
-            return "Tap to click once. Tap then hold to begin dragging. Quickly tap with two fingers to right-click."
+            return "轻点一下是单击。轻点后按住开始拖动。双指快速轻点是右键。"
         }
         switch volumeMode {
         case .delayHold:
-            return "Delay hold waits to see if you're holding or just clicking the volume button, which results in all clicks being ~0.5s long."
+            return "延迟长按会先判断你是长按还是点按音量键，代价是每次点击都会拖到约 0.5 秒。"
         case .tapThenDrag:
-            return "Tap then drag waits to see if you're holding or just clicking the volume button, but it unconditionally sends a single click regardless of whether you tap or hold, which results in shorter clicks at the cost of sending a click before holding."
+            return "轻点后拖动同样先判断长按还是点按，但它无论你点还是按都会先发一次单击，点击更短，代价是按住前会先触发一次点击。"
         case .intercept:
-            return "Activates the camera in order to intercept volume keys properly. This causes the volume keys to behave in the same way a mouse's buttons do, but it causes higher temperatures, as the camera is always on."
+            return "会打开摄像头以便正确拦截音量键。这样音量键就像鼠标按键一样工作，但摄像头一直开着，温度会更高。"
         }
     }
 
@@ -35,99 +35,99 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section("JIT") {
-                    LabeledContent("Status", value: JITBootstrap.ready ? "On" : "Off")
-                    Picker("Method", selection: $jit.method) {
+                    LabeledContent("状态", value: JITBootstrap.ready ? "已开启" : "已关闭")
+                    Picker("方式", selection: $jit.method) {
                         ForEach(JITMethod.allCases) { Text($0.title).tag($0) }
                     }
-                    Text(jit.method == .automatic ? jit.automaticDescription : "Henge uses \(jit.method.title).")
+                    Text(jit.method == .automatic ? jit.automaticDescription : "Henge 使用 \(jit.method.title)。")
                         .font(.footnote).foregroundStyle(.secondary)
-                    Button("Set up JIT") { jit.showSetup = true }
-                    Toggle("Turn on JIT when Henge opens", isOn: $jitAtLaunch)
+                    Button("设置 JIT") { jit.showSetup = true }
+                    Toggle("打开 Henge 时开启 JIT", isOn: $jitAtLaunch)
                     if jitAtLaunch {
-                        Text("Henge connects LocalDevVPN first when it is off, and comes back.")
+                        Text("LocalDevVPN 没开时，Henge 会先连接它再回来。")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
-                    LabeledContent("Code region", value: "\(JITBootstrap.jitBytes >> 20) MB, claimed once per launch")
+                    LabeledContent("代码区域", value: "\(JITBootstrap.jitBytes >> 20) MB，每次启动申请一次")
                 }
                 .listRowBackground(Desk.card)
-                Section("Memory") {
-                    LabeledContent("Extra memory", value: Entitlements.increasedMemory ? "On" : "Off")
-                    LabeledContent("Henge's limit", value: ByteText.string(UInt64(Entitlements.memoryLimitAtLaunch)))
-                    LabeledContent("Free for Henge", value: ByteText.string(UInt64(henge_available_memory())))
+                Section("内存") {
+                    LabeledContent("额外内存", value: Entitlements.increasedMemory ? "已开启" : "已关闭")
+                    LabeledContent("Henge 的上限", value: ByteText.string(UInt64(Entitlements.memoryLimitAtLaunch)))
+                    LabeledContent("Henge 可用", value: ByteText.string(UInt64(henge_available_memory())))
                     Text(Entitlements.increasedMemory
-                         ? "A Mac's memory is kept out of this limit once JIT is on. If iOS refuses that, it uses free storage instead."
-                         : "This install isn't signed with the increased memory limit entitlement. Reinstall Henge with a certificate that has it. Export your Mac first if the reinstall replaces the app's data.")
+                         ? "开启 JIT 后，Mac 的内存不计入这个上限。如果 iOS 不允许，就改用可用存储空间。"
+                         : "本次安装没有用「提高内存上限」权限签名。请改用带该权限的证书重新安装 Henge。如果重装会覆盖 App 数据，请先导出你的 Mac。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .listRowBackground(Desk.card)
                 if Device.isPad {
-                    Section("Mouse and Trackpad") {
+                    Section("鼠标与触控板") {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Pointer speed")
+                            Text("指针速度")
                             Slider(value: $mouseSpeed, in: 0.5...3)
                         }
-                        Toggle("Reverse scrolling", isOn: $reverseScrolling)
+                        Toggle("反转滚动方向", isOn: $reverseScrolling)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Scroll speed")
+                            Text("滚动速度")
                             Slider(value: $scrollSpeed, in: 0.1...1.5)
                         }
-                        Toggle("Swap physical right and middle buttons", isOn: $swapMouseButtons)
-                        Text("Only enable this if your physical mouse's right and middle buttons are reversed in the Mac. Touch controls stay unchanged. Restart the Mac session to apply.")
+                        Toggle("交换实体鼠标的右键与中键", isOn: $swapMouseButtons)
+                        Text("只有当你的实体鼠标右键和中键在 Mac 里反了才需要打开。触控操作不受影响。重启 Mac 会话后生效。")
                             .font(.footnote).foregroundStyle(.secondary)
-                        Text("A Magic Keyboard or a Bluetooth mouse moves the Mac's pointer. Pointer speed changes apply the next time a Mac starts; scroll speed changes apply immediately.")
+                        Text("妙控键盘或蓝牙鼠标可以直接操作 Mac 的指针。指针速度的更改在下次启动 Mac 时生效，滚动速度的更改立即生效。")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                     .listRowBackground(Desk.card)
                 }
                 if !Device.isPad {
-                    Section("Trackpad") {
-                        Picker("Input mode", selection: $inputMode) {
-                            Text("Touchscreen").tag(VolumeClicks.InputMode.touchscreen)
-                            Text("Volume buttons").tag(VolumeClicks.InputMode.volumeButtons)
+                    Section("触控板") {
+                        Picker("输入方式", selection: $inputMode) {
+                            Text("触屏").tag(VolumeClicks.InputMode.touchscreen)
+                            Text("音量键").tag(VolumeClicks.InputMode.volumeButtons)
                         }
                         .pickerStyle(.menu)
                         if inputMode == .volumeButtons {
-                            Picker("Button mode", selection: $volumeMode) {
-                                Text("Delay hold").tag(VolumeClicks.Mode.delayHold)
-                                Text("Tap then drag").tag(VolumeClicks.Mode.tapThenDrag)
-                                Text("Camera intercept").tag(VolumeClicks.Mode.intercept)
+                            Picker("按键模式", selection: $volumeMode) {
+                                Text("延迟长按").tag(VolumeClicks.Mode.delayHold)
+                                Text("轻点后拖动").tag(VolumeClicks.Mode.tapThenDrag)
+                                Text("摄像头拦截").tag(VolumeClicks.Mode.intercept)
                             }
                             .pickerStyle(.menu)
-                            Toggle("Swap buttons", isOn: $swapButtons)
+                            Toggle("交换按键", isOn: $swapButtons)
                         }
-                        Text("Henge is able to emulate a Magic Trackpad, allowing you to perform native macOS gestures using your device's touchscreen.\n\n\(inputDescription)")
+                        Text("Henge 可以模拟妙控板，让你用设备触屏做出原生 macOS 手势。\n\n\(inputDescription)")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                     .listRowBackground(Desk.card)
                 }
-                Section("Performance") {
-                    Picker("Mac refresh rate", selection: $refreshRate) {
+                Section("性能") {
+                    Picker("Mac 刷新率", selection: $refreshRate) {
                         Text("30 Hz").tag(30)
                         Text("60 Hz").tag(60)
                         Text("120 Hz").tag(120)
                     }
                     .pickerStyle(.segmented)
-                    Toggle("Faster disk writes", isOn: $fastFlush)
-                    Toggle("Quicker wake from idle", isOn: $wfiSpin)
-                    Toggle("Superblocks (experimental)", isOn: $superblocks)
-                    Picker("Code cache", selection: $codeCacheMB) {
+                    Toggle("更快的磁盘写入", isOn: $fastFlush)
+                    Toggle("更快从空闲唤醒", isOn: $wfiSpin)
+                    Toggle("超级块（实验性）", isOn: $superblocks)
+                    Picker("代码缓存", selection: $codeCacheMB) {
                         Text("1 GB").tag(1024)
                         Text("1.5 GB").tag(1536)
                     }
-                    Text("A bigger code cache empties less often and takes more memory; Henge picks 1.5 GB where there is room for it. Applies the next time Henge opens. If JIT stops turning on, choose 1 GB.")
+                    Text("代码缓存越大，清空得越少，但更占内存；空间够时 Henge 会选 1.5 GB。下次打开 Henge 时生效。如果 JIT 开始开不起来，请选 1 GB。")
                         .font(.footnote).foregroundStyle(.secondary)
-                    Text("macOS draws a frame for every refresh: 30 Hz leaves the most of the emulated CPU to apps, at the cost of choppier animation; 60 Hz is smoother. Faster disk writes order them without waiting for a full sync; a sudden power loss could lose the last ones. Quicker wake keeps an idle CPU watching for work for 50 µs, at some battery cost. Superblocks let translated code run past conditional branches. Changes apply the next time a Mac starts.")
+                    Text("macOS 每次刷新都会绘制一帧：30 Hz 最省模拟 CPU，留给 App 更多算力，代价是动画更卡；60 Hz 更顺滑。更快的磁盘写入只保证顺序、不等完整同步，突然断电可能丢掉最后几次写入。更快唤醒会让空闲 CPU 多盯 50 微秒找活干，略微费电。超级块让翻译后的代码跨越条件分支继续执行。以上更改都在下次启动 Mac 时生效。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 .listRowBackground(Desk.card)
-                Section("Log") {
-                    ShareLink(item: HengeLog.logFileURL) { Label("Share henge.log", systemImage: "square.and.arrow.up") }
+                Section("日志") {
+                    ShareLink(item: HengeLog.logFileURL) { Label("分享 henge.log", systemImage: "square.and.arrow.up") }
                 }
                 .listRowBackground(Desk.card)
             }
             .scrollContentBackground(.hidden)
             .background(Desk.page)
-            .navigationTitle("Settings")
+            .navigationTitle("设置")
         }
     }
 }

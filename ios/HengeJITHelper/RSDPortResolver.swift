@@ -29,7 +29,7 @@ enum RSDPortResolver {
         let browseError = DNSServiceBrowse(&browseRef, 0, 0, serviceType, "local.", browseCallback,
                                            context.toOpaque())
         guard browseError == kDNSServiceErr_NoError, let browseRef else {
-            return Result(port: nil, detail: "browse could not start (\(describe(browseError)))")
+            return Result(port: nil, detail: "浏览无法启动（\(describe(browseError))）")
         }
         state.queue = queue
         DNSServiceSetDispatchQueue(browseRef, queue)

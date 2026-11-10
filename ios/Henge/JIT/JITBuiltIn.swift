@@ -43,13 +43,13 @@ enum HengeBuiltInJIT {
 
     static var unavailableReason: String? {
 #if targetEnvironment(simulator)
-        return "Built-in JIT is available only on a physical device."
+        return "内置 JIT 只能在真机上使用。"
 #else
         guard #available(iOS 26.0, *) else {
-            return "Built-in JIT needs iOS 26 or later. Use StikDebug instead."
+            return "内置 JIT 需要 iOS 26 或更新版本。请改用 StikDebug。"
         }
         if getenv("LC_HOME_PATH") != nil {
-            return "Built-in JIT is unavailable inside LiveContainer. Use StikDebug instead."
+            return "在 LiveContainer 里无法使用内置 JIT。请改用 StikDebug。"
         }
         return nil
 #endif
@@ -71,19 +71,18 @@ enum HengeBuiltInJIT {
             completion(.failure(HelperRequest.error(code, message)))
         }
         guard unavailableReason == nil else {
-            fail(1, unavailableReason ?? "Built-in JIT is unavailable.")
+            fail(1, unavailableReason ?? "内置 JIT 不可用。")
             return
         }
         guard let identifier = helperIdentifier else {
-            fail(2, "Henge's JIT helper is missing from this installation. Reinstall Henge, and keep "
-                  + "its app extensions if your sideloader asks, or use StikDebug.")
+            fail(2, "本次安装中缺少 Henge 的 JIT 助手。请重新安装 Henge；若签名工具询问是否保留 App 扩展，请保留；或者改用 StikDebug。")
             return
         }
         if NSClassFromString("NSExtension") == nil {
             dlopen("/System/Library/Frameworks/ExtensionFoundation.framework/ExtensionFoundation", RTLD_NOW)
         }
         guard let extensionClass = NSClassFromString("NSExtension") else {
-            fail(3, "iOS did not provide the extension API Henge's JIT helper needs.")
+            fail(3, "iOS 没有提供 Henge 的 JIT 助手所需的扩展接口。")
             return
         }
         let factory = unsafeBitCast(extensionClass as AnyObject, to: NSExtensionClassShim.self)
@@ -95,7 +94,7 @@ enum HengeBuiltInJIT {
             return
         }
         guard let data = try? JSONEncoder().encode(request) else {
-            fail(4, "The request for Henge's JIT helper could not be encoded.")
+            fail(4, "无法编码发给 Henge 的 JIT 助手的请求。")
             return
         }
         let helper = HelperRequest(extension: found, operation: request.operation.rawValue,
@@ -133,14 +132,14 @@ private final class HelperRequest {
             DispatchQueue.main.async { MainActor.assumeIsolated { self?.returned(payload) } }
         }
         shim.setRequestCancellationBlock { [weak self] _, error in
-            let message = error?.localizedDescription ?? "the request was cancelled"
+            let message = error?.localizedDescription ?? "请求已取消"
             DispatchQueue.main.async { MainActor.assumeIsolated {
-                self?.end(.failure(Self.error(5, "Henge's JIT helper stopped: \(message)")))
+                self?.end(.failure(Self.error(5, "Henge 的 JIT 助手已停止：\(message)")))
             } }
         }
         shim.setRequestInterruptionBlock { [weak self] _ in
             DispatchQueue.main.async { MainActor.assumeIsolated {
-                self?.end(.failure(Self.error(6, "Henge's JIT helper stopped unexpectedly. Try again.")))
+                self?.end(.failure(Self.error(6, "Henge 的 JIT 助手意外停止，请重试。")))
             } }
         }
         let item = NSExtensionItem()
@@ -149,8 +148,7 @@ private final class HelperRequest {
             DispatchQueue.main.async { MainActor.assumeIsolated {
                 guard let self else { return }
                 guard let uuid else {
-                    self.end(.failure(Self.error(7, "Henge's JIT helper did not start. Reinstall Henge, and "
-                                                  + "keep its app extensions if your sideloader asks.")))
+                    self.end(.failure(Self.error(7, "Henge 的 JIT 助手没有启动。请重新安装 Henge；若签名工具询问是否保留 App 扩展，请保留。")))
                     return
                 }
                 HengeLog.log("jit-helper", "\(self.operation): started \(identifier) as pid "
@@ -163,7 +161,7 @@ private final class HelperRequest {
     private func returned(_ payload: Data?) {
         guard let payload,
               let response = try? JSONDecoder().decode(HengeJITRequest.Response.self, from: payload) else {
-            end(.failure(Self.error(8, "Henge's JIT helper finished without an answer.")))
+            end(.failure(Self.error(8, "Henge 的 JIT 助手结束了，但没有返回结果。")))
             return
         }
         HengeLog.log("jit-helper", "\(operation): finished success=\(response.success ? 1 : 0)")

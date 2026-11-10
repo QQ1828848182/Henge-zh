@@ -68,19 +68,15 @@ enum JITNetworkAdvice {
         guard let problem = JITConnectionProblem(helperMessage: helperMessage) else { return nil }
         if problem == .pairing {
             return JITAdvice(
-                message: "This device closed the connection, which usually means it no longer accepts "
-                       + "Henge's pairing. Pair again, and check that LocalDevVPN is connected.",
+                message: "设备断开了连接，通常说明它不再接受 Henge 的配对了。请重新配对，并确认 LocalDevVPN 已连接。",
                 actions: [.pairAgain, .connectLocalDevVPN])
         }
         guard situation == .cellularOnly else {
-            return JITAdvice(message: "Henge couldn't reach this device. Connect LocalDevVPN, then try again.",
+            return JITAdvice(message: "Henge 连不上这台设备。请先连接 LocalDevVPN 再试。",
                              actions: [.connectLocalDevVPN])
         }
         return JITAdvice(
-            message: "LocalDevVPN can show Connected while iOS still sends Henge's connection over cellular. "
-                   + "Turn Cellular Data off in Control Center, wait 2 seconds, then turn it back on. "
-                   + "Or join any Wi-Fi once; a hotspot works. "
-                   + "Keep LocalDevVPN connected, turn off other VPNs such as Tailscale, then try again.",
+            message: "LocalDevVPN 可能显示「已连接」，但 iOS 仍把 Henge 的连接走蜂窝数据。请在控制中心关掉蜂窝数据，等 2 秒再打开；或者随便连一次 Wi-Fi（热点也行）。保持 LocalDevVPN 连接、关掉 Tailscale 等其他 VPN，然后重试。",
             actions: [.connectLocalDevVPN])
     }
 }

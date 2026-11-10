@@ -166,7 +166,7 @@ final class Machines: ObservableObject {
             let data = try Data(contentsOf: folder.appendingPathComponent("machine.json"))
             let info = try JSONDecoder().decode(MachineFile.self, from: data)
             let missing = Self.required.filter { !FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path) }
-            guard missing.isEmpty, Self.hasDisk(folder) else { throw message("The folder is missing \((missing + (Self.hasDisk(folder) ? [] : ["disk.img"])).joined(separator: ", ")).") }
+            guard missing.isEmpty, Self.hasDisk(folder) else { throw message("文件夹缺少 \((missing + (Self.hasDisk(folder) ? [] : ["disk.img"])).joined(separator: ", "))。") }
             var mac = VirtualMac(name: info.name ?? folder.lastPathComponent, ecid: info.ecid, seed: info.seed ?? 0,
                                  ramMB: info.ramMB ?? 2048, diskBytes: 0)
             importing = mac.name
@@ -191,7 +191,7 @@ final class Machines: ObservableObject {
                         Task { @MainActor in Machines.shared.unpacked = fraction }
                     }, nil) == 0
                 }.value
-                guard ok else { try? fm.removeItem(at: dest); throw message("The packed disk could not be unpacked (not enough space?).") }
+                guard ok else { try? fm.removeItem(at: dest); throw message("无法解包打包好的磁盘（空间不足？）。") }
                 if move { try? fm.removeItem(at: packed) }
             }
             if move { try? fm.removeItem(at: folder) }
@@ -206,7 +206,7 @@ final class Machines: ObservableObject {
         importing = nil
     }
 
-    /// Makes a folder "Bring in a Mac" can read back (the same files tools/export_ios.sh writes),
+    /// Makes a folder "导入 Mac" can read back (the same files tools/export_ios.sh writes),
     /// in Documents/Exports, which the Files app can reach. Deleting Henge deletes that folder too,
     /// so it has to be moved out of Henge before a reinstall that replaces the app's data.
     func export(_ mac: VirtualMac) {
@@ -241,7 +241,7 @@ final class Machines: ObservableObject {
         let free = (try? Self.root.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?.volumeAvailableCapacityForImportantUsage ?? 0
         let needed = Int64(used) + (256 << 20)
         if free > 0 && free < needed {
-            throw message("Exporting \(mac.name) needs about \(ByteText.string(UInt64(needed))) free; this \(Device.name) has \(ByteText.string(UInt64(free))). Deleting a downloaded macOS installer (Install macOS, swipe it) frees about 16 GB.")
+            throw message("导出 \(mac.name) 约需 \(ByteText.string(UInt64(needed))) 可用空间，这台 \(Device.name) 只有 \(ByteText.string(UInt64(free)))。在「安装 macOS」里左滑删掉已下载的安装包，可腾出约 16 GB。")
         }
         try fm.createDirectory(at: partial, withIntermediateDirectories: true)
         do {
@@ -256,7 +256,7 @@ final class Machines: ObservableObject {
                     Task { @MainActor in Machines.shared.exported = fraction }
                 }, nil) == 0
             }.value
-            guard ok else { throw message("The disk could not be written (not enough space?).") }
+            guard ok else { throw message("无法写入磁盘（空间不足？）。") }
             try fm.moveItem(at: partial, to: final)
         } catch {
             try? fm.removeItem(at: partial)

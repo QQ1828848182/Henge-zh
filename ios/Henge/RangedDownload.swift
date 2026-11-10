@@ -104,7 +104,7 @@ final class RangedDownload: NSObject, URLSessionDataDelegate {
                 finish(nil)
                 return
             default:
-                throw NSError(domain: "Henge", code: 3, userInfo: [NSLocalizedDescriptionKey: "Apple's server answered \(status)."])
+                throw NSError(domain: "Henge", code: 3, userInfo: [NSLocalizedDescriptionKey: "Apple 的服务器返回了 \(status)。"])
             }
             let h = try FileHandle(forWritingTo: part)
             try h.truncate(atOffset: UInt64(have))
