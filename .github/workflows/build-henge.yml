@@ -121,10 +121,13 @@ jobs:
           mkdir -p ios/build
           zsh ios/scripts/package_ipa.sh || {
             echo "===== 编译失败：定位到出错的源文件 ====="
-            grep -E "error:|in file included from|\.swift:[0-9]+:[0-9]+:" ios/build/DerivedData.buildlog | sort -u | head -40
-            echo "===== Foundation 头文件映射 ====="
-            sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
-            ls "$sdk/System/Library/Frameworks/Foundation.framework/Headers" | grep -i "nsurl" || true
+            grep -B4 "NSURLHandle.h' file not found" ios/build/DerivedData.buildlog | head -30
+            echo "----- 含该错误的编译命令 -----"
+            grep -E "clang .*\.(m|c)" ios/build/DerivedData.buildlog | tail -3
+            echo "----- 所有 error 行 -----"
+            grep -E "error:" ios/build/DerivedData.buildlog | sort -u | head -20
+            echo "===== 哪个文件 import 了 Foundation ====="
+            grep -rn "Foundation/Foundation.h" ios/Henge/ tl/ 2>/dev/null | head
             exit 1
           }
 
