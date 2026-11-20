@@ -140,6 +140,13 @@ jobs:
             if grep -qa "$kw" "$BIN"; then echo "有  $kw"; else echo "无  $kw"; fi
           done
 
+      - name: 校验汉化是否进了二进制
+        working-directory: Henge
+        run: |
+          BIN=ios/build/DerivedData/Build/Products/Release-iphoneos/Henge.app/Henge
+          ls -l "$BIN"
+          python3 ios/scripts/check_zh.py "$BIN"
+
       - name: Upload Henge.ipa
         uses: actions/upload-artifact@v4
         with:
