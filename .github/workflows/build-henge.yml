@@ -111,9 +111,17 @@ jobs:
         working-directory: Henge
         run: zsh tools/build_ios_restore.sh
 
+      # SDKROOT 由 xcodebuild 之前的环境带入的话，会让 Makefile 里那些面向 macOS 的
+      # 目标（tests/fnd.m 等示例程序）错用 iOS SDK，报
+      # "Foundation/NSURLHandle.h file not found"。这里先清掉。
       - name: Build the engine
         working-directory: Henge
-        run: make ios-lib
+        env:
+          SDKROOT: ''
+          IPHONEOS_DEPLOYMENT_TARGET: ''
+        run: |
+          unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET
+          make ios-lib
 
       - name: Package Henge.ipa
         working-directory: Henge
