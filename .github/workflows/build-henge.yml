@@ -117,7 +117,16 @@ jobs:
 
       - name: Package Henge.ipa
         working-directory: Henge
-        run: zsh ios/scripts/package_ipa.sh
+        run: |
+          mkdir -p ios/build
+          zsh ios/scripts/package_ipa.sh || {
+            echo "===== 编译失败：定位到出错的源文件 ====="
+            grep -E "error:|in file included from|\.swift:[0-9]+:[0-9]+:" ios/build/DerivedData.buildlog | sort -u | head -40
+            echo "===== Foundation 头文件映射 ====="
+            sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
+            ls "$sdk/System/Library/Frameworks/Foundation.framework/Headers" | grep -i "nsurl" || true
+            exit 1
+          }
 
       - name: Upload Henge.ipa
         uses: actions/upload-artifact@v4
