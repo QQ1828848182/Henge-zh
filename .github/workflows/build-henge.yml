@@ -40,16 +40,21 @@ jobs:
 
       # Xcode 27.1 的 iOS SDK 少了一个头文件（Foundation/NSURLHandle.h），
       # 编译会报 "file not found"；27.2 里已经修好，所以用 27.2。
+      # Xcode 27.1/27.2 的 iOS SDK 缺 Foundation/NSURLHandle.h，编译报
+      # "file not found"；27.0 的 SDK 没问题（2026-11-10 那次成功用的就是它）。
       - name: Select Xcode
         run: |
           set -euo pipefail
-          for c in /Applications/Xcode_27.2.app /Applications/Xcode_27.2.0.app /Applications/Xcode_27.1.app; do
+          for c in /Applications/Xcode_27.app /Applications/Xcode_27.0.app /Applications/Xcode_27.0.0.app \
+                   /Applications/Xcode_27.2.app /Applications/Xcode_27.1.app; do
             if [ -d "$c" ]; then sudo xcode-select -s "$c"; break; fi
           done
           ver="$(xcodebuild -version)"
           sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
           echo "Xcode: ${ver%%$'\n'*}"
           echo "iOS SDK: $sdk"
+          hd="$(xcrun --sdk iphoneos --show-sdk-path)/System/Library/Frameworks/Foundation.framework/Headers"
+          echo "NSURL headers:"; ls "$hd" | grep -i "^NSURL" || true
 
       # fetch_deps.sh copies prebuilt pieces out of a BUILT Husk checkout:
       # StikJIT.xcframework (vendored in Husk's repo, comes with checkout),
