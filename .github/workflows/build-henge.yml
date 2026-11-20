@@ -131,6 +131,15 @@ jobs:
             exit 1
           }
 
+      - name: 校验汉化是否进了二进制
+        working-directory: Henge
+        run: |
+          BIN=ios/build/DerivedData/Build/Products/Release-iphoneos/Henge.app/Henge
+          echo "二进制: $BIN"; ls -l "$BIN"
+          for kw in "还没有 Mac" "秒续" "外观" "Mac 应用" "添加示例程序" "跟随系统"; do
+            if grep -qa "$kw" "$BIN"; then echo "有  $kw"; else echo "无  $kw"; fi
+          done
+
       - name: Upload Henge.ipa
         uses: actions/upload-artifact@v4
         with:
