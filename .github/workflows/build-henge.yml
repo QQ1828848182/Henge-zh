@@ -38,6 +38,19 @@ jobs:
         with:
           path: Henge
 
+      # Xcode 27.1 的 iOS SDK 少了一个头文件（Foundation/NSURLHandle.h），
+      # 编译会报 "file not found"；27.2 里已经修好，所以用 27.2。
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          for c in /Applications/Xcode_27.2.app /Applications/Xcode_27.2.0.app /Applications/Xcode_27.1.app; do
+            if [ -d "$c" ]; then sudo xcode-select -s "$c"; break; fi
+          done
+          ver="$(xcodebuild -version)"
+          sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "Xcode: ${ver%%$'\n'*}"
+          echo "iOS SDK: $sdk"
+
       # fetch_deps.sh copies prebuilt pieces out of a BUILT Husk checkout:
       # StikJIT.xcframework (vendored in Husk's repo, comes with checkout),
       # libhusk_rppairing.a (scripts/build_rppairing_ios.sh) and the
