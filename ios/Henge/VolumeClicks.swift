@@ -20,7 +20,7 @@ import AVKit
 ///    It needs a live capture session with a real frame stream, so the camera runs
 ///    (heat + the green indicator). A session with no output did not deliver events.
 ///
-/// When the input mode is "Touchscreen" none of this runs — the trackpad surface itself
+/// When the input mode is "触屏" none of this runs — the trackpad surface itself
 /// tap-clicks, hold-drags and two-finger-right-clicks (see Trackpad).
 final class VolumeClicks: NSObject {
     /// Where clicks come from: the touchscreen surface, or the volume buttons.

@@ -11,7 +11,7 @@
 # your certificate carries it, and Henge falls back to file-backed guest RAM
 # without it.
 
-name: Build Henge IPA
+name: 构建 Henge 中文版 IPA
 
 # Manual only (Actions tab > Build Henge IPA > Run workflow): pushes to main don't build an IPA.
 on:
@@ -104,7 +104,7 @@ jobs:
       - name: Upload Henge.ipa
         uses: actions/upload-artifact@v4
         with:
-          name: Henge-ipa-${{ github.sha }}
+          name: Henge-中文版-ipa-${{ github.run_number }}
           path: /Users/runner/Desktop/Henge.ipa
           if-no-files-found: error
 
@@ -115,6 +115,6 @@ jobs:
       - name: Upload Henge.tipa
         uses: actions/upload-artifact@v4
         with:
-          name: Henge-tipa-${{ github.sha }}
+          name: Henge-中文版-tipa-${{ github.run_number }}
           path: /Users/runner/Desktop/Henge.tipa
           if-no-files-found: error

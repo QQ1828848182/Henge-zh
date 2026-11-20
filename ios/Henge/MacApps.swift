@@ -40,20 +40,20 @@ struct MacApp: Identifiable, Hashable {
     var verdict: (title: String, detail: String) {
         switch UInt32(kind) {
         case HENGE_TL_PROGRAM.rawValue:
-            return ("Runs without macOS (experimental)",
-                    "A program without windows: Henge loads it into itself and runs it, with no Mac started.")
+            return ("无需 macOS 即可运行（实验性）",
+                    "这是一个无窗口程序：Henge 把它加载进自己内部运行，不需要启动 Mac。")
         case HENGE_TL_SWIFTUI.rawValue:
-            return ("Not yet: a SwiftUI app",
-                    "iOS has the SwiftUI it calls, but starting it as an app inside Henge isn't done yet. It runs in a Mac.")
+            return ("暂不支持：SwiftUI 应用",
+                    "iOS 有它调用的 SwiftUI，但在 Henge 内部把它作为 App 启动还没做完。在 Mac 里可以运行。")
         case HENGE_TL_CATALYST.rawValue:
-            return ("Not yet: a Mac Catalyst app",
-                    "It's built from an iPad app's code, so most of what it calls exists on iOS, but starting it inside Henge isn't done yet. It runs in a Mac.")
+            return ("暂不支持：Mac Catalyst 应用",
+                    "它由 iPad App 的代码构建而成，调用的东西大多在 iOS 上存在，但在 Henge 内部启动还没做完。在 Mac 里可以运行。")
         case HENGE_TL_APPKIT.rawValue:
-            return ("Experimental: an AppKit app",
-                    "It draws its windows with AppKit, which iOS doesn't have; Henge stands in its own. Made for browsers built on Chromium (Chromium, apps built with Electron or CEF); others may stop early.")
+            return ("实验性：AppKit 应用",
+                    "它用 AppKit 绘制窗口，而 iOS 没有 AppKit，Henge 自带了一套。这是为基于 Chromium 的浏览器（Chromium，以及用 Electron 或 CEF 构建的应用）做的，其他应用可能早早退出。")
         default:
-            return ("Intel only",
-                    "It has no Apple silicon code. A Mac with Rosetta runs it; Henge can't yet.")
+            return ("仅 Intel",
+                    "它没有 Apple 芯片的代码。有 Rosetta 的 Mac 能跑，Henge 目前还不行。")
         }
     }
 
@@ -75,7 +75,7 @@ final class MacAppsStore: ObservableObject {
 
     static var folder: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("Mac Apps", isDirectory: true)
+        return docs.appendingPathComponent("Mac 应用", isDirectory: true)
     }
 
     func reload() {
@@ -93,7 +93,7 @@ final class MacAppsStore: ObservableObject {
     /// A .dmg (its apps and programs are copied out), an .app, or a lone program.
     func bring(in url: URL) {
         let scoped = url.startAccessingSecurityScopedResource()
-        busy = "Bringing in \(url.lastPathComponent)…"
+        busy = "正在导入 \(url.lastPathComponent)…"
         problem = nil
         let folder = Self.folder
         Task.detached(priority: .userInitiated) {
@@ -111,7 +111,7 @@ final class MacAppsStore: ObservableObject {
                 do { try FileManager.default.copyItem(at: url, to: to) } catch { trouble = error.localizedDescription }
                 if trouble == nil, MacApp(url: to) == nil {
                     try? FileManager.default.removeItem(at: to)
-                    trouble = "\(url.lastPathComponent) isn't a Mac app or program."
+                    trouble = "\(url.lastPathComponent) 不是 Mac 应用或程序。"
                 }
             }
             let found = trouble
@@ -125,7 +125,7 @@ final class MacAppsStore: ObservableObject {
 
     func addSamples() {
         guard let samples = Bundle.main.url(forResource: "tl-samples", withExtension: "dmg") else {
-            problem = "This build has no sample programs."
+            problem = "这个版本没有示例程序。"
             return
         }
         bring(in: samples)
@@ -153,7 +153,7 @@ struct MacAppsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
-                    Text("Mac apps and programs run here through Henge's own translation layer, with no Mac started. Programs without windows run today; apps with windows are next. Experimental.")
+                    Text("Mac 应用和程序在这里通过 Henge 自带的翻译层运行，不必启动一台 Mac。目前无窗口的程序可以运行，有窗口的应用还在开发中。属实验性功能。")
                         .font(.system(size: 14)).foregroundStyle(Desk.dim)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 4).padding(.bottom, 12)
@@ -162,8 +162,8 @@ struct MacAppsView: View {
                     if store.apps.isEmpty && store.busy == nil {
                         VStack(spacing: 10) {
                             Image(systemName: "shippingbox").font(.system(size: 34)).foregroundStyle(Desk.faint)
-                            Text("Nothing here yet").font(.system(size: 17, weight: .semibold))
-                            Text("Bring in a .dmg or an .app from Files, or try Henge's sample programs.")
+                            Text("这里还是空的").font(.system(size: 17, weight: .semibold))
+                            Text("从「文件」里导入 .dmg 或 .app，或者试试 Henge 自带的示例程序。")
                                 .font(.system(size: 14)).foregroundStyle(Desk.dim).multilineTextAlignment(.center)
                         }
                         .padding(28).frame(maxWidth: .infinity).deskCard()
@@ -171,18 +171,18 @@ struct MacAppsView: View {
                     ForEach(store.apps) { app in
                         NavigationLink(value: app) { MacAppRow(app: app) }.buttonStyle(.plain).padding(.bottom, 10)
                     }
-                    Button("Add the Sample Programs") { store.addSamples() }
+                    Button("添加示例程序") { store.addSamples() }
                         .buttonStyle(DeskButtonStyle()).padding(.top, 8)
                 }
                 .padding(.horizontal, 16).padding(.vertical, 12).deskColumn()
             }
             .background(Desk.page)
-            .navigationTitle("Mac Apps")
+            .navigationTitle("Mac 应用")
             .navigationDestination(for: MacApp.self) { MacAppRunView(app: $0) }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("完成") { dismiss() } }
                 ToolbarItem(placement: .primaryAction) {
-                    Button { picking = true } label: { Image(systemName: "plus") }.accessibilityLabel("Bring in a Mac app")
+                    Button { picking = true } label: { Image(systemName: "plus") }.accessibilityLabel("导入 Mac 应用")
                 }
             }
             .fileImporter(isPresented: $picking, allowedContentTypes: [.diskImage, .applicationBundle, .folder, .unixExecutable, .data]) { result in
@@ -229,23 +229,23 @@ struct MacAppRunView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).padding(17).deskCard()
 
-                DeskHeading("About")
+                DeskHeading("关于")
                 VStack(alignment: .leading, spacing: 6) {
-                    if !app.identifier.isEmpty { LabeledContent("Identifier", value: app.identifier) }
-                    LabeledContent("Code", value: [app.arm64 ? "Apple silicon" : nil, app.intel ? "Intel" : nil].compactMap { $0 }.joined(separator: " and "))
-                    if !app.minMacOS.isEmpty { LabeledContent("Needs macOS", value: app.minMacOS + " or later") }
+                    if !app.identifier.isEmpty { LabeledContent("标识符", value: app.identifier) }
+                    LabeledContent("架构", value: [app.arm64 ? "Apple 芯片" : nil, app.intel ? "Intel" : nil].compactMap { $0 }.joined(separator: " and "))
+                    if !app.minMacOS.isEmpty { LabeledContent("需要 macOS", value: app.minMacOS + " 或更高版本") }
                 }
                 .font(.system(size: 15)).padding(17).deskCard()
 
                 if app.canRun {
-                    Button(running ? "Running…" : "Run") { run() }
+                    Button(running ? "运行中…" : "运行") { run() }
                         .buttonStyle(DeskButtonStyle()).disabled(running || (result == nil && henge_tl_ran_program() != 0)).padding(.top, 16)
-                    Text("Programs run inside Henge, one per launch. After one has run, quit Henge and open it again to run another or to start a Mac.")
+                    Text("程序在 Henge 内部运行，每次启动只能跑一个。跑过一个之后，请退出 Henge 再打开，才能跑下一个或启动 Mac。")
                         .font(.system(size: 13)).foregroundStyle(Desk.dim).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
                     if result != nil || !output.isEmpty {
-                        DeskHeading("Output")
+                        DeskHeading("输出")
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(output.isEmpty ? "(nothing printed)" : output)
+                            Text(output.isEmpty ? "（没有输出）" : output)
                                 .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             if let result { Text(result).font(.system(size: 13, weight: .semibold)).foregroundStyle(Desk.dim) }
@@ -254,20 +254,20 @@ struct MacAppRunView: View {
                     }
                 }
                 if app.canOpenWindowed {
-                    Button("Open (experimental)") { showScreen = true }
+                    Button("打开（实验性）") { showScreen = true }
                         .buttonStyle(DeskButtonStyle()).disabled(henge_tl_ran_program() != 0).padding(.top, 16)
-                    Text("It runs inside Henge, one app per launch, without a Mac. Tap to click, scroll with one finger, drag with two, hold for a right click; the keyboard button brings up the keyboard. Quit Henge (swipe it away) to stop it.")
+                    Text("它在 Henge 内部运行，每次启动只跑一个 App，不需要 Mac。轻点是单击，单指滚动，双指拖动，长按是右键；点键盘按钮可以呼出键盘。退出 Henge（上滑关掉）即可停止。")
                         .font(.system(size: 13)).foregroundStyle(Desk.dim).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
                 }
-                Button("Delete", role: .destructive) { confirmDelete = true }.padding(.top, 24)
+                Button("删除", role: .destructive) { confirmDelete = true }.padding(.top, 24)
             }
             .padding(.horizontal, 16).padding(.vertical, 12).deskColumn()
         }
         .background(Desk.page)
         .navigationTitle(app.name)
         .fullScreenCover(isPresented: $showScreen) { MacAppScreen(app: app) }
-        .confirmationDialog("Delete \(app.name)?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete", role: .destructive) { store.delete(app); dismiss() }
+        .confirmationDialog("删除 \(app.name)？", isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button("删除", role: .destructive) { store.delete(app); dismiss() }
         }
     }
 
@@ -285,7 +285,7 @@ struct MacAppRunView: View {
             HengeLog.log("macapps", "\(exe) returned \(rc)\(why.isEmpty ? "" : ": \(why)")")
             await MainActor.run {
                 output = String(text.suffix(20000))
-                result = rc == -1 && !why.isEmpty ? "Could not run it: \(why)" : "Finished with code \(rc)."
+                result = rc == -1 && !why.isEmpty ? "无法运行：\(why)" : "已结束，退出码 \(rc)。"
                 running = false
             }
         }

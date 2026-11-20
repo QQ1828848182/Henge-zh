@@ -9,19 +9,19 @@ struct StoppedMacView: View {
 
     private var title: String {
         switch outcome {
-        case Int32(HENGE_VM_OUTCOME_SHUTDOWN.rawValue): return "Mac shut down"
-        case Int32(HENGE_VM_OUTCOME_RESTART.rawValue): return "Mac requested a restart"
-        case Int32(HENGE_VM_OUTCOME_HOST_STOP.rawValue): return "Mac stopped"
-        default: return "Mac stopped unexpectedly"
+        case Int32(HENGE_VM_OUTCOME_SHUTDOWN.rawValue): return "Mac 已关机"
+        case Int32(HENGE_VM_OUTCOME_RESTART.rawValue): return "Mac 请求重启"
+        case Int32(HENGE_VM_OUTCOME_HOST_STOP.rawValue): return "Mac 已停止"
+        default: return "Mac 意外停止"
         }
     }
 
     private var detail: String {
-        let next = "You can start this Mac again or return to your Macs."
+        let next = "你可以重新启动这台 Mac，或者返回 Mac 列表。"
         switch outcome {
         case Int32(HENGE_VM_OUTCOME_SHUTDOWN.rawValue), Int32(HENGE_VM_OUTCOME_HOST_STOP.rawValue): return next
-        case Int32(HENGE_VM_OUTCOME_RESTART.rawValue): return "The Mac is ready to start again."
-        default: return "The Mac stopped: \(reason). " + next
+        case Int32(HENGE_VM_OUTCOME_RESTART.rawValue): return "这台 Mac 可以重新启动了。"
+        default: return "Mac 已停止：\(reason)。" + next
         }
     }
 
@@ -31,8 +31,8 @@ struct StoppedMacView: View {
             Text(title).font(.headline)
             Text(detail).font(.subheadline).foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
-            if let start { Button("Start Mac", action: start).buttonStyle(.borderedProminent) }
-            Button("Close", action: close).buttonStyle(.bordered)
+            if let start { Button("启动 Mac", action: start).buttonStyle(.borderedProminent) }
+            Button("关闭", action: close).buttonStyle(.bordered)
         }
         .foregroundStyle(.white)
         .padding(24)

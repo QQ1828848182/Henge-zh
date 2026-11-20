@@ -494,7 +494,7 @@ struct MacKeyRow: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Desk.raised, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             }
-            .accessibilityLabel("Hide keyboard")
+            .accessibilityLabel("收起键盘")
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 5)
@@ -633,7 +633,7 @@ struct MacMenuButton: UIViewRepresentable {
     static func elements() -> [UIMenuElement] {
         guard let raw = henge_tl_app_main_menu(),
               let items = Unmanaged<NSArray>.fromOpaque(raw).takeRetainedValue() as? [[String: Any]], !items.isEmpty else {
-            return [UIAction(title: "This app has no menus", attributes: .disabled) { _ in }]
+            return [UIAction(title: "这个应用没有菜单", attributes: .disabled) { _ in }]
         }
         return build(items)
     }
@@ -734,10 +734,10 @@ struct MacAppScreen: View {
         }.value
         if let failure {
             HengeLog.log("macapps", "could not load \(app.name): \(failure)")
-            status = "Could not open it: \(failure)"
+            status = "无法打开：\(failure)"
             return
         }
-        status = "Starting…"
+        status = "正在启动…"
         henge_tl_app_run_soon { rc in
             HengeLog.log("macapps", "the app's main returned \(rc)")
         }

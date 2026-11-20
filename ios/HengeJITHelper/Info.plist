@@ -41,7 +41,7 @@
 		<string>HengeJITHelperHandler</string>
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Henge's JIT helper looks up the port this device's pairing service listens on.</string>
+	<string>Henge 的 JIT 助手需要查找这台设备的配对服务所用的端口。</string>
 	<key>XPCService</key>
 	<dict>
 		<key>ServiceType</key>
